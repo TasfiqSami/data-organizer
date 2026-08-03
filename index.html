@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professional Data Parser & Organizer</title>
     
-    <!-- SVG Favicon (Data URI) -->
+    <!-- SVG Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%233b82f6'><path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z'/></svg>">
 
     <style>
-        /* CSS Variables for Themes */
         :root {
             /* Dark Theme Default */
             --bg-color: #090d16;
@@ -30,7 +29,7 @@
             --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-        /* Light Theme Options */
+        /* Light Theme */
         [data-theme="light"] {
             --bg-color: #f3f4f6;
             --surface-bg: #ffffff;
@@ -74,14 +73,18 @@
             background-color: var(--bg-color);
             color: var(--text-primary);
             min-height: 100vh;
-            padding: 40px 20px;
+            padding: 40px 20px 20px;
             line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .app-container {
             max-width: 960px;
             margin: 0 auto;
+            width: 100%;
         }
 
         .app-header {
@@ -154,6 +157,59 @@
             border-color: var(--accent-primary);
         }
 
+        /* Guide Card */
+        .guide-card {
+            background-color: var(--surface-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .guide-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--accent-primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .guide-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .step-item {
+            background-color: var(--input-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+        }
+
+        .step-number {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .step-text {
+            font-size: 0.825rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .step-text strong {
+            color: var(--text-primary);
+        }
+
+        /* Input Card */
         .input-card {
             background-color: var(--surface-bg);
             border: 1px solid var(--card-border);
@@ -313,6 +369,20 @@
         .empty-state p {
             font-size: 0.9rem;
         }
+
+        /* Footer Styles */
+        .app-footer {
+            margin-top: 48px;
+            padding-top: 20px;
+            border-top: 1px solid var(--card-border);
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .app-footer strong {
+            color: var(--text-primary);
+        }
     </style>
 </head>
 <body>
@@ -325,7 +395,7 @@
                 <p>Parse raw text lines and tab-delimited records into clean key-value formats.</p>
             </div>
             <div class="header-controls">
-                <span class="badge">v2.1 Stable</span>
+                <span class="badge">v2.2 Production</span>
                 <span class="counter-badge" id="recordCounter">0 Records</span>
                 <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle Theme">
                     🌙 <span id="themeText">Dark</span>
@@ -333,11 +403,33 @@
             </div>
         </header>
 
+        <!-- Quick Guide Section -->
+        <section class="guide-card">
+            <div class="guide-title">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                How to Use This Tool
+            </div>
+            <div class="guide-steps">
+                <div class="step-item">
+                    <div class="step-number">Step 1</div>
+                    <div class="step-text">Paste single-line text or tab-separated Excel rows into the input box.</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">Step 2</div>
+                    <div class="step-text">Click <strong>Organize Data</strong> (or press <strong>Ctrl + Enter</strong>) to extract fields.</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">Step 3</div>
+                    <div class="step-text">Click <strong>Copy Record</strong> on any card or <strong>Copy All Records</strong> for bulk export.</div>
+                </div>
+            </div>
+        </section>
+
         <!-- Input Section -->
         <main class="input-card">
             <div class="label-group">
                 <label for="rawInput">Raw Input Data</label>
-                <span class="hint">Supports Excel tab rows & raw strings (Ctrl + Enter to Parse)</span>
+                <span class="hint">Supports Excel tab rows & raw strings</span>
             </div>
             <textarea id="rawInput" placeholder="Paste single-line text or tab-delimited Excel rows here..."></textarea>
             
@@ -362,9 +454,16 @@
                 <p>No records parsed yet. Paste your raw data above and click <strong>Organize Data</strong>.</p>
             </div>
         </section>
+
+        <!-- Footer Section -->
+        <footer class="app-footer">
+            <p>Developed with ❤️ by <strong>Tasfiq Ahmed</strong> &copy; <span id="year"></span> | Client-Side Secure Parser</p>
+        </footer>
     </div>
 
     <script>
+        document.getElementById('year').innerText = new Date().getFullYear();
+
         // ---------------- Theme Switcher Engine ---------------- //
         function initTheme() {
             const savedTheme = localStorage.getItem('theme') || 'auto';
@@ -414,7 +513,7 @@
             }
         });
 
-        // ---------------- Core Parser Logic ---------------- //
+        // ---------------- Smart Parser Engine ---------------- //
         const US_STATES = new Set([
             'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA',
             'HI','ID','IL','IN','IA','KS','KY','LA','ME','MD',
@@ -432,81 +531,86 @@
                     state = 'N/A', zip = 'N/A', ssn = 'N/A', dob = 'N/A', 
                     gmail = 'N/A', pass = 'N/A', twoFa = 'N/A', phone = 'N/A';
 
-                // 1. Tab-Delimited Parsing (e.g. Excel Paste)
-                if (line.includes('\t')) {
-                    const cols = line.split('\t').map(c => c.trim());
-                    
-                    firstName = cols[0] || 'N/A';
-                    lastName  = cols[1] || 'N/A';
-                    
-                    const rawAddr = cols[2] || '';
-                    const rawCity = cols[3] || '';
-                    address   = rawCity ? `${rawAddr} ${rawCity}`.trim() : (rawAddr || 'N/A');
-                    
-                    state     = cols[4] || 'N/A';
-                    zip       = cols[5] || 'N/A';
-                    ssn       = cols[6] || 'N/A';
-                    dob       = cols[7] || 'N/A';
+                // Get items either by tab delimiter or space sequence
+                let items = line.includes('\t') 
+                    ? line.split('\t').map(c => c.trim()).filter(Boolean)
+                    : line.split(/\s+/).map(c => c.trim()).filter(Boolean);
 
-                    for (let i = 8; i < cols.length; i++) {
-                        const col = cols[i];
-                        if (!col) continue;
-                        if (col.includes('@')) {
-                            gmail = col;
-                        } else if (/^\d{10}$/.test(col.replace(/\D/g, ''))) {
-                            phone = col.replace(/\D/g, '');
+                let remainingTokens = [];
+
+                // 1. Pattern Extractors (Agnostic of Column Position)
+                for (let i = 0; i < items.length; i++) {
+                    const token = items[i];
+
+                    // Email
+                    if (gmail === 'N/A' && /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(token)) {
+                        gmail = token.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/)[0];
+                        continue;
+                    }
+
+                    // DOB (e.g. 11-01-1974 or 11/01/1974)
+                    if (dob === 'N/A' && /\b\d{1,2}[/-]\d{1,2}[/-]\d{4}\b/.test(token)) {
+                        dob = token.match(/\b\d{1,2}[/-]\d{1,2}[/-]\d{4}\b/)[0];
+                        continue;
+                    }
+
+                    // Phone (e.g. 916-386-9972 or 10 digits)
+                    if (phone === 'N/A' && /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/.test(token)) {
+                        phone = token;
+                        continue;
+                    }
+
+                    // SSN (e.g. 621742768 or 3-2-4 formatted)
+                    if (ssn === 'N/A' && (/\b\d{3}-\d{2}-\d{4}\b/.test(token) || /^\d{9}$/.test(token))) {
+                        ssn = token;
+                        continue;
+                    }
+
+                    // Combined State + ZIP (e.g., CA95824)
+                    const stateZipMatch = token.match(/^([A-Za-z]{2})(\d{5})$/);
+                    if (stateZipMatch) {
+                        if (US_STATES.has(stateZipMatch[1].toUpperCase())) {
+                            state = stateZipMatch[1].toUpperCase();
+                            zip = stateZipMatch[2];
+                            continue;
                         }
                     }
 
-                    return buildOutput(firstName, lastName, address, state, zip, ssn, dob, gmail, pass, twoFa, phone);
-                }
-
-                // 2. Unstructured String Parsing
-                const emailMatch = line.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-                if (emailMatch) gmail = emailMatch[0];
-
-                const ssnMatch = line.match(/\b\d{3}-\d{2}-\d{4}\b/);
-                if (ssnMatch) ssn = ssnMatch[0];
-
-                const dobMatch = line.match(/\b\d{1,2}[/-]\d{1,2}[/-]\d{4}\b/);
-                if (dobMatch) dob = dobMatch[0];
-
-                const phoneMatch = line.match(/\b\d{10}\b/);
-                if (phoneMatch) phone = phoneMatch[0];
-
-                if (line.includes(':')) {
-                    const colonSplit = line.split(':');
-                    if (colonSplit.length > 1 && colonSplit[1]) pass = colonSplit[1].trim();
-                    if (colonSplit.length > 2) {
-                        twoFa = colonSplit.slice(1, -1).join(':').trim();
-                    } else {
-                        twoFa = pass;
-                    }
-                }
-
-                let leadText = line;
-                if (dob !== 'N/A') leadText = leadText.split(dob)[0];
-                else if (gmail !== 'N/A') leadText = leadText.split(gmail)[0];
-                else if (line.includes(':')) leadText = leadText.split(':')[0];
-
-                const tokens = leadText.split(/\s{2,}/).map(t => t.trim()).filter(Boolean);
-
-                if (tokens.length >= 1) firstName = tokens[0];
-                if (tokens.length >= 2) lastName = tokens[1];
-
-                let addressParts = [];
-                for (let i = 2; i < tokens.length; i++) {
-                    const token = tokens[i];
-                    if (US_STATES.has(token.toUpperCase())) {
+                    // Separate State
+                    if (state === 'N/A' && US_STATES.has(token.toUpperCase())) {
                         state = token.toUpperCase();
-                    } else if (/^\d{4,5}$/.test(token)) {
+                        continue;
+                    }
+
+                    // Separate ZIP
+                    if (zip === 'N/A' && /^\d{5}$/.test(token)) {
                         zip = token;
-                    } else {
-                        addressParts.push(token);
+                        continue;
+                    }
+
+                    remainingTokens.push(token);
+                }
+
+                // 2. Assign Name & Address from remaining tokens
+                if (remainingTokens.length >= 1) firstName = remainingTokens.shift();
+                if (remainingTokens.length >= 1) lastName = remainingTokens.shift();
+
+                // If last token looks like a city (and state/zip found), extract it
+                let city = 'N/A';
+                if (remainingTokens.length > 0 && (state !== 'N/A' || zip !== 'N/A')) {
+                    // Check if last token is not a street number/type
+                    const possibleCity = remainingTokens[remainingTokens.length - 1];
+                    if (!/^\d+$/.test(possibleCity) && !/^(St|Ave|Rd|Blvd|Ct|Dr|Ln|Way|Pl|Cir)$/i.test(possibleCity)) {
+                        city = remainingTokens.pop();
                     }
                 }
 
-                if (addressParts.length > 0) address = addressParts.join(' ');
+                if (remainingTokens.length > 0) {
+                    const rawAddr = remainingTokens.join(' ');
+                    address = city !== 'N/A' ? `${rawAddr} ${city}`.trim() : rawAddr;
+                } else if (city !== 'N/A') {
+                    address = city;
+                }
 
                 return buildOutput(firstName, lastName, address, state, zip, ssn, dob, gmail, pass, twoFa, phone);
             } catch (err) {
