@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Data Parser & Organizer</title>
+    
+    <!-- SVG Favicon (Data URI) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%233b82f6'><path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z'/></svg>">
+
+    <style>
+        /* CSS Variables for Themes */
+        :root {
+            /* Dark Theme Default */
+            --bg-color: #090d16;
+            --surface-bg: #111827;
+            --card-bg: #1f2937;
+            --card-border: #374151;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --accent-primary: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #10b981;
+            --success-hover: #059669;
+            --input-bg: #0b101d;
+            --empty-bg: rgba(17, 24, 39, 0.4);
+            --radius-lg: 12px;
+            --radius-md: 8px;
+            --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* Light Theme Options */
+        [data-theme="light"] {
+            --bg-color: #f3f4f6;
+            --surface-bg: #ffffff;
+            --card-bg: #ffffff;
+            --card-border: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --accent-primary: #2563eb;
+            --accent-hover: #1d4ed8;
+            --success: #10b981;
+            --success-hover: #059669;
+            --input-bg: #f9fafb;
+            --empty-bg: #f9fafb;
+        }
+
+        @media (prefers-color-scheme: light) {
+            [data-theme="auto"] {
+                --bg-color: #f3f4f6;
+                --surface-bg: #ffffff;
+                --card-bg: #ffffff;
+                --card-border: #e5e7eb;
+                --text-primary: #111827;
+                --text-secondary: #6b7280;
+                --accent-primary: #2563eb;
+                --accent-hover: #1d4ed8;
+                --success: #10b981;
+                --success-hover: #059669;
+                --input-bg: #f9fafb;
+                --empty-bg: #f9fafb;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 40px 20px;
+            line-height: 1.5;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .app-container {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .title-group h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+
+        .title-group p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .badge {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--accent-primary);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .counter-badge {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: none;
+        }
+
+        .theme-toggle {
+            background-color: var(--surface-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .input-card {
+            background-color: var(--surface-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .label-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .label-group label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .hint {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        textarea {
+            width: 100%;
+            height: 160px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            resize: vertical;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        textarea:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 18px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-primary);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--card-border);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            opacity: 0.85;
+        }
+
+        .btn-copy {
+            background-color: var(--success);
+            color: #ffffff;
+            font-size: 0.775rem;
+            padding: 6px 12px;
+        }
+
+        .btn-copy:hover {
+            background-color: var(--success-hover);
+        }
+
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .result-card {
+            background-color: var(--surface-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: border-color 0.2s, background-color 0.3s ease;
+        }
+
+        .result-card:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .record-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+        }
+
+        pre {
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--text-secondary);
+            border: 2px dashed var(--card-border);
+            border-radius: var(--radius-lg);
+            background-color: var(--empty-bg);
+        }
+
+        .empty-state p {
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="title-group">
+                <h1>Data Structuring Workspace</h1>
+                <p>Parse raw text lines and tab-delimited records into clean key-value formats.</p>
+            </div>
+            <div class="header-controls">
+                <span class="badge">v2.1 Stable</span>
+                <span class="counter-badge" id="recordCounter">0 Records</span>
+                <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle Theme">
+                    🌙 <span id="themeText">Dark</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Input Section -->
+        <main class="input-card">
+            <div class="label-group">
+                <label for="rawInput">Raw Input Data</label>
+                <span class="hint">Supports Excel tab rows & raw strings (Ctrl + Enter to Parse)</span>
+            </div>
+            <textarea id="rawInput" placeholder="Paste single-line text or tab-delimited Excel rows here..."></textarea>
+            
+            <div class="controls">
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="organizeData()">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Organize Data
+                    </button>
+                    <button class="btn-secondary" onclick="clearInput()">Clear</button>
+                </div>
+                <button class="btn-secondary" onclick="copyAllResults()" id="copyAllBtn" style="display: none;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                    Copy All Records
+                </button>
+            </div>
+        </main>
+
+        <!-- Output Section -->
+        <section id="results" class="results-container">
+            <div class="empty-state">
+                <p>No records parsed yet. Paste your raw data above and click <strong>Organize Data</strong>.</p>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // ---------------- Theme Switcher Engine ---------------- //
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'auto';
+            setTheme(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            let newTheme = 'dark';
+
+            if (currentTheme === 'dark') {
+                newTheme = 'light';
+            } else if (currentTheme === 'light') {
+                newTheme = 'dark';
+            } else {
+                const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+                newTheme = prefersLight ? 'dark' : 'light';
+            }
+
+            setTheme(newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            const themeBtn = document.getElementById('themeBtn');
+            
+            let actualTheme = theme;
+            if (theme === 'auto') {
+                actualTheme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+            }
+
+            if (actualTheme === 'light') {
+                themeBtn.innerHTML = '☀️ <span>Light</span>';
+            } else {
+                themeBtn.innerHTML = '🌙 <span>Dark</span>';
+            }
+        }
+
+        initTheme();
+
+        // Keyboard Shortcut: Ctrl + Enter / Cmd + Enter
+        document.getElementById('rawInput').addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                organizeData();
+            }
+        });
+
+        // ---------------- Core Parser Logic ---------------- //
+        const US_STATES = new Set([
+            'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA',
+            'HI','ID','IL','IN','IA','KS','KY','LA','ME','MD',
+            'MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ',
+            'NM','NY','NC','ND','OH','OK','OR','PA','RI','SC',
+            'SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'
+        ]);
+
+        function parseLine(text) {
+            try {
+                let line = text.trim();
+                if (!line) return null;
+
+                let firstName = 'N/A', lastName = 'N/A', address = 'N/A', 
+                    state = 'N/A', zip = 'N/A', ssn = 'N/A', dob = 'N/A', 
+                    gmail = 'N/A', pass = 'N/A', twoFa = 'N/A', phone = 'N/A';
+
+                // 1. Tab-Delimited Parsing (e.g. Excel Paste)
+                if (line.includes('\t')) {
+                    const cols = line.split('\t').map(c => c.trim());
+                    
+                    firstName = cols[0] || 'N/A';
+                    lastName  = cols[1] || 'N/A';
+                    
+                    const rawAddr = cols[2] || '';
+                    const rawCity = cols[3] || '';
+                    address   = rawCity ? `${rawAddr} ${rawCity}`.trim() : (rawAddr || 'N/A');
+                    
+                    state     = cols[4] || 'N/A';
+                    zip       = cols[5] || 'N/A';
+                    ssn       = cols[6] || 'N/A';
+                    dob       = cols[7] || 'N/A';
+
+                    for (let i = 8; i < cols.length; i++) {
+                        const col = cols[i];
+                        if (!col) continue;
+                        if (col.includes('@')) {
+                            gmail = col;
+                        } else if (/^\d{10}$/.test(col.replace(/\D/g, ''))) {
+                            phone = col.replace(/\D/g, '');
+                        }
+                    }
+
+                    return buildOutput(firstName, lastName, address, state, zip, ssn, dob, gmail, pass, twoFa, phone);
+                }
+
+                // 2. Unstructured String Parsing
+                const emailMatch = line.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+                if (emailMatch) gmail = emailMatch[0];
+
+                const ssnMatch = line.match(/\b\d{3}-\d{2}-\d{4}\b/);
+                if (ssnMatch) ssn = ssnMatch[0];
+
+                const dobMatch = line.match(/\b\d{1,2}[/-]\d{1,2}[/-]\d{4}\b/);
+                if (dobMatch) dob = dobMatch[0];
+
+                const phoneMatch = line.match(/\b\d{10}\b/);
+                if (phoneMatch) phone = phoneMatch[0];
+
+                if (line.includes(':')) {
+                    const colonSplit = line.split(':');
+                    if (colonSplit.length > 1 && colonSplit[1]) pass = colonSplit[1].trim();
+                    if (colonSplit.length > 2) {
+                        twoFa = colonSplit.slice(1, -1).join(':').trim();
+                    } else {
+                        twoFa = pass;
+                    }
+                }
+
+                let leadText = line;
+                if (dob !== 'N/A') leadText = leadText.split(dob)[0];
+                else if (gmail !== 'N/A') leadText = leadText.split(gmail)[0];
+                else if (line.includes(':')) leadText = leadText.split(':')[0];
+
+                const tokens = leadText.split(/\s{2,}/).map(t => t.trim()).filter(Boolean);
+
+                if (tokens.length >= 1) firstName = tokens[0];
+                if (tokens.length >= 2) lastName = tokens[1];
+
+                let addressParts = [];
+                for (let i = 2; i < tokens.length; i++) {
+                    const token = tokens[i];
+                    if (US_STATES.has(token.toUpperCase())) {
+                        state = token.toUpperCase();
+                    } else if (/^\d{4,5}$/.test(token)) {
+                        zip = token;
+                    } else {
+                        addressParts.push(token);
+                    }
+                }
+
+                if (addressParts.length > 0) address = addressParts.join(' ');
+
+                return buildOutput(firstName, lastName, address, state, zip, ssn, dob, gmail, pass, twoFa, phone);
+            } catch (err) {
+                console.error("Error parsing record line:", err);
+                return null;
+            }
+        }
+
+        function buildOutput(firstName, lastName, address, state, zip, ssn, dob, gmail, pass, twoFa, phone) {
+            return `First Name: ${firstName}
+Last name: ${lastName}
+Address: ${address}
+State: ${state}
+ZIP: ${zip}
+SSN: ${ssn}
+DOB: ${dob}
+Gmail: ${gmail}
+Pass: ${pass}
+2fa: ${twoFa}
+Phone: ${phone}`;
+        }
+
+        // ---------------- Workspace Actions ---------------- //
+        function organizeData() {
+            const raw = document.getElementById('rawInput').value;
+            const lines = raw.split('\n');
+            const resultsDiv = document.getElementById('results');
+            const copyAllBtn = document.getElementById('copyAllBtn');
+            const recordCounter = document.getElementById('recordCounter');
+            
+            resultsDiv.innerHTML = '';
+            let count = 0;
+
+            lines.forEach((line) => {
+                const formatted = parseLine(line);
+                if (formatted) {
+                    count++;
+                    const card = document.createElement('div');
+                    card.className = 'result-card';
+                    card.innerHTML = `
+                        <div class="result-header">
+                            <span class="record-title">Record #${count}</span>
+                            <button class="btn-copy" onclick="copyCardText(this, 'out-${count}')">Copy Record</button>
+                        </div>
+                        <pre id="out-${count}">${formatted}</pre>
+                    `;
+                    resultsDiv.appendChild(card);
+                }
+            });
+
+            if (count > 0) {
+                copyAllBtn.style.display = 'inline-flex';
+                recordCounter.style.display = 'inline-block';
+                recordCounter.innerText = `${count} ${count === 1 ? 'Record' : 'Records'}`;
+            } else {
+                copyAllBtn.style.display = 'none';
+                recordCounter.style.display = 'none';
+                resultsDiv.innerHTML = '<div class="empty-state"><p>No valid records found. Check your input format.</p></div>';
+            }
+        }
+
+        function clearInput() {
+            document.getElementById('rawInput').value = '';
+            document.getElementById('results').innerHTML = '<div class="empty-state"><p>No records parsed yet. Paste your raw data above and click <strong>Organize Data</strong>.</p></div>';
+            document.getElementById('copyAllBtn').style.display = 'none';
+            document.getElementById('recordCounter').style.display = 'none';
+        }
+
+        function copyCardText(btn, elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = 'Copied!';
+                btn.style.backgroundColor = '#059669';
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.backgroundColor = '';
+                }, 1200);
+            }).catch(err => {
+                console.error("Failed to copy text:", err);
+            });
+        }
+
+        function copyAllResults() {
+            const pres = document.querySelectorAll('.results-container pre');
+            if (pres.length === 0) return;
+
+            const allText = Array.from(pres).map(p => p.innerText).join('\n\n---\n\n');
+            const copyBtn = document.getElementById('copyAllBtn');
+
+            navigator.clipboard.writeText(allText).then(() => {
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerText = 'All Copied!';
+                copyBtn.style.backgroundColor = '#10b981';
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                    copyBtn.style.backgroundColor = '';
+                }, 1500);
+            }).catch(err => {
+                console.error("Failed to copy all results:", err);
+            });
+        }
+    </script>
+</body>
+</html>
