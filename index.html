@@ -632,83 +632,113 @@ Phone: ${phone}`;
         }
 
         // ---------------- Workspace Actions ---------------- //
+        function createEmptyState(message) {
+            const emptyState = document.createElement('div');
+            emptyState.className = 'empty-state';
+
+            const paragraph = document.createElement('p');
+            paragraph.textContent = message;
+            emptyState.appendChild(paragraph);
+
+            return emptyState;
+        }
+
         function organizeData() {
             const raw = document.getElementById('rawInput').value;
             const lines = raw.split('\n');
             const resultsDiv = document.getElementById('results');
             const copyAllBtn = document.getElementById('copyAllBtn');
             const recordCounter = document.getElementById('recordCounter');
-            
-            resultsDiv.innerHTML = '';
+
+            resultsDiv.replaceChildren();
             let count = 0;
 
             lines.forEach((line) => {
                 const formatted = parseLine(line);
-                if (formatted) {
-                    count++;
-                    const card = document.createElement('div');
-                    card.className = 'result-card';
-                    card.innerHTML = `
-                        <div class="result-header">
-                            <span class="record-title">Record #${count}</span>
-                            <button class="btn-copy" onclick="copyCardText(this, 'out-${count}')">Copy Record</button>
-                        </div>
-                        <pre id="out-${count}">${formatted}</pre>
-                    `;
-                    resultsDiv.appendChild(card);
-                }
+                if (!formatted) return;
+
+                count++;
+
+                const card = document.createElement('div');
+                card.className = 'result-card';
+
+                const header = document.createElement('div');
+                header.className = 'result-header';
+
+                const title = document.createElement('span');
+                title.className = 'record-title';
+                title.textContent = `Record #${count}`;
+
+                const copyButton = document.createElement('button');
+                copyButton.type = 'button';
+                copyButton.className = 'btn-copy';
+                copyButton.textContent = 'Copy Record';
+
+                const output = document.createElement('pre');
+                output.id = `out-${count}`;
+                // Parsed values come from user input, so render them as text rather than HTML.
+                output.textContent = formatted;
+
+                copyButton.addEventListener('click', () => copyCardText(copyButton, output));
+
+                header.append(title, copyButton);
+                card.append(header, output);
+                resultsDiv.appendChild(card);
             });
 
             if (count > 0) {
                 copyAllBtn.style.display = 'inline-flex';
                 recordCounter.style.display = 'inline-block';
-                recordCounter.innerText = `${count} ${count === 1 ? 'Record' : 'Records'}`;
+                recordCounter.textContent = `${count} ${count === 1 ? 'Record' : 'Records'}`;
             } else {
                 copyAllBtn.style.display = 'none';
                 recordCounter.style.display = 'none';
-                resultsDiv.innerHTML = '<div class="empty-state"><p>No valid records found. Check your input format.</p></div>';
+                resultsDiv.appendChild(createEmptyState('No valid records found. Check your input format.'));
             }
         }
 
         function clearInput() {
             document.getElementById('rawInput').value = '';
-            document.getElementById('results').innerHTML = '<div class="empty-state"><p>No records parsed yet. Paste your raw data above and click <strong>Organize Data</strong>.</p></div>';
+            document.getElementById('results').replaceChildren(
+                createEmptyState('No records parsed yet. Paste your raw data above and click Organize Data.')
+            );
             document.getElementById('copyAllBtn').style.display = 'none';
             document.getElementById('recordCounter').style.display = 'none';
         }
 
-        function copyCardText(btn, elementId) {
-            const text = document.getElementById(elementId).innerText;
+        function copyCardText(button, output) {
+            const text = output.textContent;
+
             navigator.clipboard.writeText(text).then(() => {
-                const originalText = btn.innerText;
-                btn.innerText = 'Copied!';
-                btn.style.backgroundColor = '#059669';
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.style.backgroundColor = '#059669';
                 setTimeout(() => {
-                    btn.innerText = originalText;
-                    btn.style.backgroundColor = '';
+                    button.textContent = originalText;
+                    button.style.backgroundColor = '';
                 }, 1200);
             }).catch(err => {
-                console.error("Failed to copy text:", err);
+                console.error('Failed to copy text:', err);
             });
         }
 
         function copyAllResults() {
-            const pres = document.querySelectorAll('.results-container pre');
-            if (pres.length === 0) return;
+            const outputs = document.querySelectorAll('.results-container pre');
+            if (outputs.length === 0) return;
 
-            const allText = Array.from(pres).map(p => p.innerText).join('\n\n---\n\n');
-            const copyBtn = document.getElementById('copyAllBtn');
+            const allText = Array.from(outputs).map(output => output.textContent).join('\n\n---\n\n');
+            const copyButton = document.getElementById('copyAllBtn');
 
             navigator.clipboard.writeText(allText).then(() => {
-                const originalText = copyBtn.innerHTML;
-                copyBtn.innerText = 'All Copied!';
-                copyBtn.style.backgroundColor = '#10b981';
+                const originalText = copyButton.innerHTML;
+                copyButton.textContent = 'All Copied!';
+                copyButton.style.backgroundColor = '#10b981';
                 setTimeout(() => {
-                    copyBtn.innerHTML = originalText;
-                    copyBtn.style.backgroundColor = '';
+                    copyButton.innerHTML = originalText;
+                    copyButton.style.backgroundColor = '';
                 }, 1500);
             }).catch(err => {
-                console.error("Failed to copy all results:", err);
+                console.error('Failed to copy all results:', err);
             });
         }
     </script>
